@@ -20,8 +20,14 @@ public class ConnectionsImp implements Connections{
         return UserMap.get(id);
     }
 
+    public boolean removeUserMap(Integer id){ return UserMap.remove(id) != null;}
+
     public void addConnection(int id, ConnectionHandler connection){
         activeMap.put(id, connection);
+    }
+
+    public ConnectionHandler getConnection(int id){
+        return activeMap.get(id);
     }
 
     @Override

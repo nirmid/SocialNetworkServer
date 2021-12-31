@@ -45,6 +45,8 @@ public class User {
         return followers.add(user);
     }
 
+    public boolean isFollowing(User user){return following.contains(user);}
+
     public boolean unFollow(User user){
         return following.remove(user);
     }

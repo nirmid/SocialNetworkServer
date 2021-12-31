@@ -1,9 +1,6 @@
 package bgu.spl.net.api;
 
-import bgu.spl.net.srv.Connections;
-import bgu.spl.net.srv.ConnectionsImp;
-import bgu.spl.net.srv.User;
-import bgu.spl.net.srv.UserDataBase;
+import bgu.spl.net.srv.*;
 
 public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
     private UserDataBase userDB;
@@ -45,11 +42,11 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                 String password = tokens[2];
                 int capatcha = Integer.parseInt(tokens[3]);
                 User user = userDB.getUser(username);
-                if(user != null && user.getPassword().equals(password) && user.getCurClient() != -1){
-                    if(capatcha == 1){
-                        user.setCurClient(connectionID);
-                        connections.send(connectionID,"ACK 2");
-                    }
+                if(user != null && user.getPassword().equals(password) && user.getCurClient() == -1 && capatcha == 1 &&
+                        ((ConnectionsImp)connections).getUserMap(connectionID) == null){
+                    user.setCurClient(connectionID);
+                    ((ConnectionsImp)connections).setUserMap(connectionID,user); // in order to know if certain connectionID has already logged in to some user
+                    connections.send(connectionID,"ACK 2");
                 }
                 else
                     connections.send(connectionID,"ERROR 2");
@@ -60,6 +57,7 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                 if(((ConnectionsImp)connections).getUserMap(connectionID) != null){
                     User user = ((ConnectionsImp)connections).getUserMap(connectionID);
                     user.setCurClient(-1);
+                    ((ConnectionsImp)connections).removeUserMap(connectionID);
                     connections.send(connectionID,"ACK 3");
                 }
                 else
@@ -67,6 +65,16 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                 break;
             }
             case 4: // follow / unfollow
+            {
+                int command = Integer.parseInt(tokens[1]);
+                String username = tokens[2];
+                if(userDB.getUser(username) == null | ((ConnectionsImp)connections).getUserMap(connectionID) == null) { // if user is not registered or the CH is not logged in to a user
+                    connections.send(connectionID,"ERROR 4");
+                }
+                else{
+
+                }
+            }
         }
     }
 
