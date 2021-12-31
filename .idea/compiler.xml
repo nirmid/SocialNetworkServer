@@ -6,8 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="spl3" />
+        <module name="spl-net" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="spl-net" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
