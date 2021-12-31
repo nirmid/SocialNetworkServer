@@ -5,15 +5,18 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class UserDataBase {
     private ConcurrentHashMap<String,User> userDB ;
-    private ConcurrentHashMap<User , ConcurrentLinkedQueue<String>> blockDB;
+    private ConcurrentHashMap<User, ConcurrentLinkedQueue<String>> blockDB;
+    private ConcurrentHashMap<User, ConcurrentLinkedQueue<String>> postDB;
     private static boolean isDone = false;
     private static UserDataBase DB = null;
+
 
 
     private UserDataBase(){
 
         userDB = new ConcurrentHashMap<String,User>();
         blockDB = new ConcurrentHashMap<User , ConcurrentLinkedQueue<String>>();
+        postDB = new ConcurrentHashMap<User, ConcurrentLinkedQueue<String>>();
     }
 
     public static UserDataBase getInstace() {

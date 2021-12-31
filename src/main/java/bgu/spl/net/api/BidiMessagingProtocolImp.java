@@ -17,15 +17,15 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
 
     @Override
     public void process(Object message) {
-        String[] tokens = ((String)message).split(" ");
-        int i=1;
-        int opcode = Integer.parseInt(tokens[0]);
+        int opcode = Integer.parseInt(((String)message).substring(0,2));
+        String string = ((String)message).substring(3);
         switch (opcode){
             case 1: // register
             {
-                String username = tokens[1];
-                String password = tokens[2];
-                String birthday = tokens[3];
+                String[] tokens = string.split("\0");
+                String username = tokens[0];
+                String password = tokens[1];
+                String birthday = tokens[2];
                 if(userDB.getUser(username) != null){
                     connections.send(connectionID,"ERROR 1");
                 }
@@ -38,9 +38,10 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
             }
             case 2: // login
             {
-                String username = tokens[1];
-                String password = tokens[2];
-                int capatcha = Integer.parseInt(tokens[3]);
+                String[] tokens = string.split("\0");
+                String username = tokens[0];
+                String password = tokens[1];
+                int capatcha = Integer.parseInt(tokens[2]);
                 User user = userDB.getUser(username);
                 if(user != null && user.getPassword().equals(password) && user.getCurClient() == -1 && capatcha == 1 &&
                         ((ConnectionsImp)connections).getUserMap(connectionID) == null){
@@ -66,20 +67,40 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
             }
             case 4: // follow / unfollow
             {
-                int command = Integer.parseInt(tokens[1]);
-                String username = tokens[2];
-                if(userDB.getUser(username) == null | ((ConnectionsImp)connections).getUserMap(connectionID) == null) { // if user is not registered or the CH is not logged in to a user
+                int command = Integer.parseInt(string.substring(0,1));
+                String[] tokens = string.substring(2).split("\0");
+                String username = tokens[0];
+                if(userDB.getUser(username) == null | ((ConnectionsImp)connections).getUserMap(connectionID) == null
+                        || userDB.isUserBlocked(userDB.getUser(username),((ConnectionsImp)connections).getUserMap(connectionID).getUserName() )) { // if user is not registered or the CH is not logged in to a user or blocked
                     connections.send(connectionID,"ERROR 4");
                 }
-                else{
+                else {
+                    if (command == 1) {
+                        if (((ConnectionsImp) connections).getUserMap(connectionID).isFollowing(userDB.getUser(username))) {
+                            connections.send(connectionID, "ERROR 4");
+                        } else {
+                            ((ConnectionsImp) connections).getUserMap(connectionID).follow(userDB.getUser(username));
+                            connections.send(connectionID, "ACK 4 " + username);
+                        }
+                    } else {
+                        if (!((ConnectionsImp) connections).getUserMap(connectionID).isFollowing(userDB.getUser(username))) {
+                            connections.send(connectionID, "ERROR 4");
+                        } else {
+                            ((ConnectionsImp) connections).getUserMap(connectionID).unFollow(userDB.getUser(username));
+                            connections.send(connectionID, "ACK 4 " + username);
+                        }
 
+                    }
                 }
+                break;
+            }
+
+            case 5: { // post
+                String[] tokens = string.split("\0");
+                String post = tokens[0];
+
             }
         }
-    }
-
-    private void register(String[] tokens){
-
     }
 
     @Override
