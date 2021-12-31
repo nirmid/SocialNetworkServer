@@ -75,6 +75,11 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
 
                 }
             }
+            case 5: // post
+            {
+
+
+            }
         }
     }
 
