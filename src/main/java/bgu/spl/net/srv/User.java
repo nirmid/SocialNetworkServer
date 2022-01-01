@@ -8,7 +8,7 @@ public class User {
     private String birthDate;
     private ConcurrentLinkedQueue<User> followers;
     private ConcurrentLinkedQueue<User> following;
-    private ConcurrentLinkedQueue<Object> meseeges;
+    private ConcurrentLinkedQueue<Object> messages;
     private int curClient;
 
     public User(String _userName,String _password, String _birthDate){
@@ -17,7 +17,7 @@ public class User {
         birthDate = _birthDate;
         followers = new ConcurrentLinkedQueue<User>();
         following = new ConcurrentLinkedQueue<User>();
-        meseeges = new ConcurrentLinkedQueue<Object>();
+        messages = new ConcurrentLinkedQueue<Object>();
         curClient = -1;
     }
 
@@ -28,6 +28,8 @@ public class User {
     public String getUserName() {
         return userName;
     }
+
+    public String getBirthDate(){ return birthDate;}
 
     public int getCurClient(){
         return curClient;
@@ -56,12 +58,14 @@ public class User {
     }
 
     public void addMessage(Object msg){
-        meseeges.add(msg);
+        messages.add(msg);
     }
 
     public Object removeMessage(){
-        return meseeges.poll();
+        return messages.poll();
     }
+
+    public ConcurrentLinkedQueue<User>  getFollowers(){return followers;}
 
 
 
