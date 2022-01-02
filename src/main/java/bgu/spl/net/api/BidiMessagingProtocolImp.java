@@ -6,14 +6,14 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
-    private UserDataBase userDB;
+    private DataBase userDB;
     private int connectionID;
     private Connections connections;
 
 
     @Override
     public void start(int connectionId, Connections connections) {
-        userDB = UserDataBase.getInstance();
+        userDB = DataBase.getInstance();
         this.connectionID = connectionId;
         this.connections = connections;
     }

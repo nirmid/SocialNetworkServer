@@ -3,18 +3,18 @@ package bgu.spl.net.srv;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class UserDataBase {
+public class DataBase {
     private ConcurrentHashMap<String,User> userDB ;
     //private ConcurrentHashMap<User, ConcurrentLinkedQueue<String>> blockDB;
     private ConcurrentHashMap<User, ConcurrentLinkedQueue<String>> postDB;
     private ConcurrentLinkedQueue<String> postsAndPms;
     private ConcurrentLinkedQueue<String> wordsToFilter;
     private static boolean isDone = false;
-    private static UserDataBase DB = null;
+    private static DataBase DB = null;
 
 
 
-    private UserDataBase(){
+    private DataBase(){
         postsAndPms = new ConcurrentLinkedQueue<String>();
         userDB = new ConcurrentHashMap<String,User>();
         //blockDB = new ConcurrentHashMap<User , ConcurrentLinkedQueue<String>>();
@@ -22,11 +22,11 @@ public class UserDataBase {
         wordsToFilter = new ConcurrentLinkedQueue<String>();
     }
 
-    public static UserDataBase getInstance() {
+    public static DataBase getInstance() {
         if (isDone == false) {
-            synchronized (UserDataBase.class) {
+            synchronized (DataBase.class) {
                 if (isDone == false) {
-                    DB = new UserDataBase();
+                    DB = new DataBase();
                     isDone = true;
                 }
             }
