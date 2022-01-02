@@ -1,5 +1,9 @@
 package bgu.spl.net.srv;
 
+import com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
+import com.sun.xml.internal.bind.v2.runtime.output.UTF8XmlOutput;
+
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -91,7 +95,11 @@ public class User {
     public ConcurrentLinkedQueue<User>  getFollowers(){return followers;}
 
     public String getStat(){
-        String output = "ACK 8 "+age+" "+numOfPost+" "+followers.size()+" "+following.size();
+//        byte[] ageB = ByteBuffer.allocate(2).putInt(age).array();
+//        byte[] numOfPostsB = ByteBuffer.allocate(2).putInt(numOfPost).array();
+//        byte[] followersB = ByteBuffer.allocate(2).putInt(followers.size()).array();
+//        byte[] followingB = ByteBuffer.allocate(2).putInt(following.size()).array();
+        String output = " " + age + " "+numOfPost+" "+followers.size()+" "+ following.size() + "\0";
         return output;
     }
 

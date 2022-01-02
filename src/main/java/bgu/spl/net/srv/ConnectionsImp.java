@@ -1,5 +1,6 @@
 package bgu.spl.net.srv;
 
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionsImp implements Connections{
@@ -19,6 +20,8 @@ public class ConnectionsImp implements Connections{
     public User getUserMap(Integer id){
         return UserMap.get(id);
     }
+
+    public Collection<User> getActiveUsers () {return UserMap.values();}
 
     public void setActiveMap(Integer id,ConnectionHandler ch){activeMap.put(id,ch);}
 
