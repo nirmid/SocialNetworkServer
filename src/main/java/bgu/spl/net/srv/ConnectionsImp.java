@@ -20,6 +20,8 @@ public class ConnectionsImp implements Connections{
         return UserMap.get(id);
     }
 
+    public void setActiveMap(Integer id,ConnectionHandler ch){activeMap.put(id,ch);}
+
     public boolean removeUserMap(Integer id){ return UserMap.remove(id) != null;}
 
     public void addConnection(int id, ConnectionHandler connection){
@@ -32,6 +34,7 @@ public class ConnectionsImp implements Connections{
 
     @Override
     public boolean send(int connectionId, Object msg) {
+        activeMap.get(connectionId).send(msg);
         return false;
     }
 

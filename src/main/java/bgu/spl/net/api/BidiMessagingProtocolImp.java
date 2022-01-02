@@ -30,11 +30,11 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                 String password = tokens[1];
                 String birthday = tokens[2];
                 if (userDB.getUser(username) != null) {
-                    connections.send(connectionID, "ERROR 1");
+                    connections.send(connectionID, "111");
                 } else {
                     User user = new User(username, password, birthday);
                     userDB.setUserDB(user);
-                    connections.send(connectionID, "ACK 1");
+                    connections.send(connectionID, "101");
                 }
                 break;
             }
@@ -49,9 +49,14 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                         ((ConnectionsImp) connections).getUserMap(connectionID) == null) {
                     user.setCurClient(connectionID);
                     ((ConnectionsImp) connections).setUserMap(connectionID, user); // in order to know if certain connectionID has already logged in to some user
-                    connections.send(connectionID, "ACK 2");
+                    connections.send(connectionID, "102");
+                    message = user.removeMessage();
+                    while (message != null){
+                        connections.send(connectionID, message);
+                        message = user.removeMessage();
+                    }
                 } else
-                    connections.send(connectionID, "ERROR 2");
+                    connections.send(connectionID, "112");
                 break;
             }
             case 3: // logout
@@ -60,9 +65,9 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                     User user = ((ConnectionsImp) connections).getUserMap(connectionID);
                     user.setCurClient(-1);
                     ((ConnectionsImp) connections).removeUserMap(connectionID);
-                    connections.send(connectionID, "ACK 3");
+                    connections.send(connectionID, "103");
                 } else
-                    connections.send(connectionID, "ERROR 3");
+                    connections.send(connectionID, "113");
                 break;
             }
             case 4: // follow / unfollow
@@ -70,23 +75,26 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                 int command = Integer.parseInt(string.substring(0, 1));
                 String[] tokens = string.substring(2).split("\0");
                 String username = tokens[0];
-                if (userDB.getUser(username) == null | ((ConnectionsImp) connections).getUserMap(connectionID) == null
-                        || userDB.isUserBlocked(userDB.getUser(username), ((ConnectionsImp) connections).getUserMap(connectionID).getUserName())) { // if user is not registered or the CH is not logged in to a user or blocked
-                    connections.send(connectionID, "ERROR 4");
+                User clientUser = ((ConnectionsImp) connections).getUserMap(connectionID);
+                User targetUser = userDB.getUser(username);
+                if (targetUser == null | clientUser == null || clientUser.isBlocked(targetUser)) { // if user is not registered or the CH is not logged in to a user or blocked
+                    connections.send(connectionID, "114");
                 } else {
-                    if (command == 1) {
-                        if (((ConnectionsImp) connections).getUserMap(connectionID).isFollowing(userDB.getUser(username))) {
-                            connections.send(connectionID, "ERROR 4");
+                    if (command == 0) {
+                        if (clientUser.isFollowing(targetUser)) {
+                            connections.send(connectionID, "114");
                         } else {
-                            ((ConnectionsImp) connections).getUserMap(connectionID).follow(userDB.getUser(username));
-                            connections.send(connectionID, "ACK 4 " + username);
+                            clientUser.follow(targetUser);
+                            targetUser.newFollower(clientUser);
+                            connections.send(connectionID, "104" + username);
                         }
                     } else {
-                        if (!((ConnectionsImp) connections).getUserMap(connectionID).isFollowing(userDB.getUser(username))) {
-                            connections.send(connectionID, "ERROR 4");
+                        if (!clientUser.isFollowing(targetUser)) {
+                            connections.send(connectionID, "114");
                         } else {
-                            ((ConnectionsImp) connections).getUserMap(connectionID).unFollow(userDB.getUser(username));
-                            connections.send(connectionID, "ACK 4 " + username);
+                            clientUser.unFollow(targetUser);
+                            userDB.getUser(username).removeFollower(clientUser);
+                            connections.send(connectionID, "104" + username);
                         }
 
                     }
@@ -95,20 +103,22 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
             }
 
             case 5: { // post
-                if (((ConnectionsImp) connections).getUserMap(connectionID) != null) {
+                User clientUser = ((ConnectionsImp) connections).getUserMap(connectionID);
+                if (clientUser != null) {
                     String post = ((String) string).substring(0, string.length() - 1);
                     userDB.addPostOrPm(post);
                     String[] tokens = post.split(" ");
-                    for (User follower : ((ConnectionsImp) connections).getUserMap(connectionID).getFollowers()) {
+                    String output ="091"+clientUser.getUserName()+"\0"+post+"\0";
+                    for (User follower : clientUser.getFollowers()) {
                         if (follower.getCurClient() != -1)
-                            connections.send(follower.getCurClient(), post);
+                            connections.send(follower.getCurClient(), output);
                         else
-                            follower.addMessage(post);
+                            follower.addMessage(output);
                     }
                     for (String word : tokens) {
                         if (((Character) word.charAt(0)).equals('@')) {
                             if (userDB.getUser(word.substring(1)) == null)
-                                connections.send(connectionID, "ERROR 4"); ///????????? should it send an error?
+                                connections.send(connectionID, "114"); ///????????? should it send an error?
                             else if (userDB.getUser(word.substring(1)).getCurClient() != -1)
                                 connections.send(userDB.getUser(word.substring(1)).getCurClient(), post);
                             else {
@@ -116,38 +126,41 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                             }
                         }
                     }
-                }
-                else
-                    connections.send(connectionID, "ERROR 5");
+                    clientUser.addPost(); // adding user's post counter
+                } else
+                    connections.send(connectionID, "115");
                 break;
             }
 
             case 6: // PM
-                if (((ConnectionsImp) connections).getUserMap(connectionID) != null) { // if error accured should I save the PM??
+                User clientUser = ((ConnectionsImp) connections).getUserMap(connectionID);
+                if (clientUser != null) { // if error accured should I save the PM??
                     String[] tokens = string.split("\0");
-                    if (userDB.getUser(tokens[0]) != null){
+                    if (userDB.getUser(tokens[0]) != null) {
                         String filteredMessage = "";
                         String[] pm = string.split(" ");
-                        for (String word: pm){
+                        for (String word : pm) {
                             if (userDB.getWordsToFilter().contains(word))
                                 filteredMessage = filteredMessage + "<filtered> ";
                             else
-                                filteredMessage = filteredMessage + word + " " ;
+                                filteredMessage = filteredMessage + word + " ";
                         }
+                        String output ="090"+clientUser.getUserName()+"\0"+filteredMessage+"\0";
                         if (userDB.getUser(tokens[0]).getCurClient() != -1)
-                            connections.send(userDB.getUser(tokens[0]).getCurClient(), filteredMessage + "\0" + tokens[2]);
+                            connections.send(userDB.getUser(tokens[0]).getCurClient(),output);
+                            //connections.send(userDB.getUser(tokens[0]).getCurClient(), filteredMessage + "\0" + tokens[2]);
                         else
-                            userDB.getUser(tokens[0]).addMessage(filteredMessage + "\0" + tokens[2]);
+                            userDB.getUser(tokens[0]).addMessage(output);
+                            //userDB.getUser(tokens[0]).addMessage(filteredMessage + "\0" + tokens[2]);
                         userDB.addPostOrPm(filteredMessage + "\0" + tokens[2]);///////// w\o date and time
-                    }
-                    else
-                        connections.send(connectionID, "ERROR 6");
-                }
-                else
-                    connections.send(connectionID, "ERROR 6");
+                    } else
+                        connections.send(connectionID, "116");
+                } else
+                    connections.send(connectionID, "116");
                 break;
 
             case 7: // logstat
+            {
                 if (((ConnectionsImp) connections).getUserMap(connectionID) != null) {
                     LocalDate date = LocalDate.now();
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -155,24 +168,58 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                     int year = Integer.parseInt(today[2]);
                     int month = Integer.parseInt(today[1]);
                     int day = Integer.parseInt(today[0]);
-                    for (User user: userDB.getUserDB().values()){
+                    for (User user : userDB.getUserDB().values()) {
                         String stat = "10 7 ";
                         String[] birthDay = user.getBirthDate().split("-");
                         int age = year - Integer.parseInt(birthDay[2]);
-                      //  if (month > )
-
+                        //  if (month > )
 
 
                     }
+                } else
+                    connections.send(connectionID, "117");
+                break;
+            }
+
+            case 8: // STAT
+            {
+                if(((ConnectionsImp) connections).getUserMap(connectionID) != null){
+                    String[] tokens = string.split("(//|)|(\0)");
+                    for(String username : tokens){
+                        if(username != "//|" | username !="\0"){
+                            if(userDB.getUser(username) == null)
+                                connections.send(connectionID, "118");
+                            else
+                                connections.send(connectionID,userDB.getUser(username).getStat());
+                        }
+                    }
                 }
                 else
-                    connections.send(connectionID, "ERROR 7");
-
-
-
-
+                    connections.send(connectionID, "118");
+                break;
+            }
+            case 12: // Block
+            {
+                String[] tokens = string.split("\0");
+                User blockedUser = userDB.getUser(tokens[0]);
+                User blockingUser = ((ConnectionsImp) connections).getUserMap(connectionID);
+                if(blockedUser != null && blockingUser != null ){
+                    // remove blocking user from blocked user
+                    blockedUser.removeFollower(blockingUser);
+                    blockedUser.unFollow(blockingUser);
+                    // remove blocked user from blocking user
+                    blockingUser.removeFollower(blockedUser);
+                    blockingUser.unFollow(blockedUser);
+                    // adding to the blocked list at each user
+                    blockingUser.addBlocked(blockedUser);
+                    blockedUser.addBlocked(blockingUser);
                 }
+                else
+                    connections.send(connectionID,"1112");
+            }
+        }
     }
+
 
 
     @Override

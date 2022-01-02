@@ -25,6 +25,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
         this.protocol = protocol;
         this.connections = connections;
         id = _id;
+        ((ConnectionsImp) connections).setActiveMap(id,this);
         //user = null;
 
     }
@@ -73,6 +74,16 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
     @Override
     public void send(T msg) {
-
+        try {
+            BufferedOutputStream out = new BufferedOutputStream(sock.getOutputStream());
+            while (!protocol.shouldTerminate() && connected) {
+                if (msg != null) {
+                    out.write(encdec.encode(msg));
+                    out.flush();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

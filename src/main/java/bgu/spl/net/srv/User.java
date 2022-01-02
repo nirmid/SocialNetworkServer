@@ -1,14 +1,20 @@
 package bgu.spl.net.srv;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class User {
     private String userName;
     private String password;
     private String birthDate;
+    private int age;
     private ConcurrentLinkedQueue<User> followers;
     private ConcurrentLinkedQueue<User> following;
     private ConcurrentLinkedQueue<Object> messages;
+    private ConcurrentLinkedQueue<User> blocked;
+    private int numOfPost;
     private int curClient;
 
     public User(String _userName,String _password, String _birthDate){
@@ -18,7 +24,16 @@ public class User {
         followers = new ConcurrentLinkedQueue<User>();
         following = new ConcurrentLinkedQueue<User>();
         messages = new ConcurrentLinkedQueue<Object>();
+        blocked= new ConcurrentLinkedQueue<User>();
         curClient = -1;
+        numOfPost = 0;
+        age = calculateAge();
+    }
+
+    private int calculateAge(){
+        LocalDate date = LocalDate.now();
+        LocalDate birthday = LocalDate.parse(birthDate);
+        return Period.between(birthday,date).getYears();
     }
 
     public String getPassword() {
@@ -57,6 +72,14 @@ public class User {
         return followers.remove(user);
     }
 
+    public void addPost(){ numOfPost = numOfPost +1;}
+
+    public void addBlocked(User user){ blocked.add(user); }
+
+    public boolean isBlocked(User user){ return blocked.contains(user); }
+
+    public int getNumOfPost() { return numOfPost;}
+
     public void addMessage(Object msg){
         messages.add(msg);
     }
@@ -66,6 +89,11 @@ public class User {
     }
 
     public ConcurrentLinkedQueue<User>  getFollowers(){return followers;}
+
+    public String getStat(){
+        String output = "ACK 8 "+age+" "+numOfPost+" "+followers.size()+" "+following.size();
+        return output;
+    }
 
 
 

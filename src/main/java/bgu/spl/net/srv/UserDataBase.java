@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class UserDataBase {
     private ConcurrentHashMap<String,User> userDB ;
-    private ConcurrentHashMap<User, ConcurrentLinkedQueue<String>> blockDB;
+    //private ConcurrentHashMap<User, ConcurrentLinkedQueue<String>> blockDB;
     private ConcurrentHashMap<User, ConcurrentLinkedQueue<String>> postDB;
     private ConcurrentLinkedQueue<String> postsAndPms;
     private ConcurrentLinkedQueue<String> wordsToFilter;
@@ -17,7 +17,7 @@ public class UserDataBase {
     private UserDataBase(){
         postsAndPms = new ConcurrentLinkedQueue<String>();
         userDB = new ConcurrentHashMap<String,User>();
-        blockDB = new ConcurrentHashMap<User , ConcurrentLinkedQueue<String>>();
+        //blockDB = new ConcurrentHashMap<User , ConcurrentLinkedQueue<String>>();
         postDB = new ConcurrentHashMap<User, ConcurrentLinkedQueue<String>>();
         wordsToFilter = new ConcurrentLinkedQueue<String>();
     }
@@ -44,6 +44,7 @@ public class UserDataBase {
 
     public ConcurrentHashMap<String,User> getUserDB(){return userDB;}
 
+    /*
     public void setBlockDB(User user , String username){
         if(blockDB.get(user) == null ){
             ConcurrentLinkedQueue list = new ConcurrentLinkedQueue<String>();
@@ -55,11 +56,13 @@ public class UserDataBase {
         }
     }
 
+
     public boolean isUserBlocked(User user, String username){
         if(blockDB.get(user) == null)
             return false;
         return blockDB.get(user).contains(username);
     }
+     */
 
     public void addPostOrPm(String string){
         postsAndPms.add(string);
