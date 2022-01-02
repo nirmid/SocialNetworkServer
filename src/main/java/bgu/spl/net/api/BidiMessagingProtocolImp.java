@@ -66,6 +66,7 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                     user.setCurClient(-1);
                     ((ConnectionsImp) connections).removeUserMap(connectionID);
                     connections.send(connectionID, "1003");
+                    connections.disconnect(connectionID);
                 } else
                     connections.send(connectionID, "1103");
                 break;

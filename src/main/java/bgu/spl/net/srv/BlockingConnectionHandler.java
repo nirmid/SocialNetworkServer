@@ -79,4 +79,6 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
             e.printStackTrace();
         }
     }
+
+    public void shouldTerminate(){protocol.shouldTerminate();}
 }

@@ -31,8 +31,9 @@ public class messageEncoderDecoderImp implements MessageEncoderDecoder {
             String statsPerUser = smessage.substring(0, smessage.length()-1);
             String[] tokens = statsPerUser.split("\0");
             for (String userStat : tokens){
-                out.write(tokens[0].getBytes(StandardCharsets.UTF_8), 0, tokens[0].length());
-                String[] stats = userStat.split(" ");
+                Short opcode = Short.parseShort(userStat.substring(0,2));
+                out.write(shortToBytes(opcode), 0, 2);
+                String[] stats = userStat.substring(3).split(" ");
                 for (String stat : stats){
                     Short statVal = Short.parseShort(stat);
                     out.write(shortToBytes(statVal), 0, 2);

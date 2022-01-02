@@ -48,6 +48,6 @@ public class ConnectionsImp implements Connections{
 
     @Override
     public void disconnect(int connectionId) {
-
+        activeMap.get(connectionId).
     }
 }
