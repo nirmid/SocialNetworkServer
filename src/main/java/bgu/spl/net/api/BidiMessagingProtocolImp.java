@@ -5,7 +5,7 @@ import bgu.spl.net.srv.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
+public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
     private DataBase dataBase;
     private int connectionID;
     private Connections connections;
@@ -19,8 +19,9 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
     }
 
     @Override
-    public void process(Object message) {
-        int opcode = Integer.parseInt(((String) message).substring(0, 2));
+    public void process(String message) {
+        System.out.println(message);
+        int opcode = Integer.parseInt((message).substring(0, 2));
         String string = ((String) message).substring(2);
         switch (opcode) {
             case 1: // register

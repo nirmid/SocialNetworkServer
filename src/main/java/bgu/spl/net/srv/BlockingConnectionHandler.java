@@ -1,5 +1,6 @@
 package bgu.spl.net.srv;
 
+import bgu.spl.net.api.BidiMessagingProtocol;
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
 import java.io.BufferedInputStream;
@@ -10,7 +11,7 @@ import java.net.Socket;
 public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler<T> {
 
     private final int id;
-    private final MessagingProtocol<T> protocol;
+    private final BidiMessagingProtocol<T> protocol;
     private final MessageEncoderDecoder<T> encdec;
     private final Socket sock;
     private BufferedInputStream in;
@@ -19,14 +20,14 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
     private Connections<T> connections;
     //private User user;
 
-    public BlockingConnectionHandler(int _id, Socket sock, MessageEncoderDecoder<T> reader, MessagingProtocol<T> protocol, Connections connections) {
+    public BlockingConnectionHandler(int _id, Socket sock, MessageEncoderDecoder<T> reader, BidiMessagingProtocol<T> protocol, Connections connections) {
         this.sock = sock;
         this.encdec = reader;
         this.protocol = protocol;
         this.connections = connections;
         id = _id;
         ((ConnectionsImp) connections).setActiveMap(id,this);
-        //user = null;
+        protocol.start(id,connections);
 
     }
 
@@ -69,11 +70,10 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
     public void send(T msg) {
         try {
             BufferedOutputStream out = new BufferedOutputStream(sock.getOutputStream());
-            while (!protocol.shouldTerminate() && connected) {
-                if (msg != null) {
-                    out.write(encdec.encode(msg));
-                    out.flush();
-                }
+            if (msg != null) {
+                out.write(encdec.encode(msg));
+                out.flush();
+                System.out.println(msg);
             }
         } catch (IOException e) {
             e.printStackTrace();

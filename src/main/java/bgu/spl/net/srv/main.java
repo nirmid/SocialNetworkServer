@@ -12,7 +12,7 @@ import java.io.InputStream;
 public class main {
     public static void main(String[] args) {
         BaseServerImp baseServerImp = new BaseServerImp(
-                Integer.decode(args[1]),
+                7777,
                 () -> new BidiMessagingProtocolImp(),
                 () -> new messageEncoderDecoderImp());
         baseServerImp.serve();

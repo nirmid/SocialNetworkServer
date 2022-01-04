@@ -104,6 +104,8 @@ public class messageEncoderDecoderImp implements MessageEncoderDecoder {
         short opcode = bytesToShort(opcodeB);
         result = new String(bytes, 2, len, StandardCharsets.UTF_8);
         result = opcode+result;
+        if(opcode < 10)
+            result = '0' +result;
         len = 0;
         return  result;
     }

@@ -36,7 +36,8 @@ public class User {
 
     private int calculateAge(){
         LocalDate date = LocalDate.now();
-        LocalDate birthday = LocalDate.parse(birthDate);
+
+        LocalDate birthday = LocalDate.parse("1995-12-30");
         return Period.between(birthday,date).getYears();
     }
 
