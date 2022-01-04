@@ -34,17 +34,32 @@ public class messageEncoderDecoderImp implements MessageEncoderDecoder {
                 (Integer.parseInt(smessage.substring(2, 4)) == 7 || (Integer.parseInt(smessage.substring(2, 4)) == 8 ))){
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             String statsPerUser = smessage.substring(0, smessage.length()-1);
+
             String[] tokens = statsPerUser.split("\0");
+            for(int i=0; i< tokens.length; i= i+1){
+                Short opcode = Short.parseShort(tokens[i].substring(0,2));
+                out.write(shortToBytes(opcode), 0, 2);
+                String[] stats = tokens[i].substring(2).split(" ");
+                for (String stat : stats){
+                    Short statVal = Short.parseShort(stat);
+                    out.write(shortToBytes(statVal), 0, 2);
+                }
+                if(i<tokens.length-1)
+                    out.write(("\0").getBytes(StandardCharsets.UTF_8), 0, 1);
+            }
+            /*
             for (String userStat : tokens){
                 Short opcode = Short.parseShort(userStat.substring(0,2));
                 out.write(shortToBytes(opcode), 0, 2);
-                String[] stats = userStat.substring(3).split(" ");
+                String[] stats = userStat.substring(2).split(" ");
                 for (String stat : stats){
                     Short statVal = Short.parseShort(stat);
                     out.write(shortToBytes(statVal), 0, 2);
                 }
                 out.write(("\0").getBytes(StandardCharsets.UTF_8), 0, 1);
             }
+             */
+
             out.write((";").getBytes(StandardCharsets.UTF_8), 0, 1);
             return out.toByteArray();
         }
@@ -59,6 +74,7 @@ public class messageEncoderDecoderImp implements MessageEncoderDecoder {
         bytes[len++] = nextByte;
     }
 
+/*
     private String popString2() { // old popstring
         String result = "";
         byte[] typeB ={bytes[0],bytes[1]};
@@ -80,6 +96,7 @@ public class messageEncoderDecoderImp implements MessageEncoderDecoder {
         len = 0;
         return  result;
     }
+ */
 
     private String popString() { // decoder
         String result = "";
