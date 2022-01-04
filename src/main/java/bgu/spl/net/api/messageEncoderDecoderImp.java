@@ -74,29 +74,6 @@ public class messageEncoderDecoderImp implements MessageEncoderDecoder {
         bytes[len++] = nextByte;
     }
 
-/*
-    private String popString2() { // old popstring
-        String result = "";
-        byte[] typeB ={bytes[0],bytes[1]};
-        short type = bytesToShort(typeB);
-        byte[] opcodeB ={bytes[2],bytes[3]};
-        short opcode = bytesToShort(opcodeB);
-
-        if(type == 10 && (opcode == 7 | opcode == 8 )){
-            result = result + type + opcode;
-            for(int i = 4; i<len-1; i=i+2){
-                byte[] cur = {bytes[i], bytes[i+1]};
-                short temp = bytesToShort(cur);
-                result = result + " " + temp;
-            }
-        }
-        else {
-             result = new String(bytes, 0, len, StandardCharsets.UTF_8);
-        }
-        len = 0;
-        return  result;
-    }
- */
 
     private String popString() { // decoder
         String result = "";

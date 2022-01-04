@@ -22,7 +22,7 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
     public void process(String message) {
         System.out.println(message);
         int opcode = Integer.parseInt((message).substring(0, 2));
-        String string = ((String) message).substring(2);
+        String string = message.substring(2);
         switch (opcode) {
             case 1: // register
             {

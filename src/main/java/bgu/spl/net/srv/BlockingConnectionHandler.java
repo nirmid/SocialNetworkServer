@@ -44,15 +44,16 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 
     @Override
     public void run() {
-        try (Socket sock = this.sock) { //just for automatic closing
+        try (Socket sock = this.sock) {
             int read;
             in = new BufferedInputStream(sock.getInputStream());
-
+            out = new BufferedOutputStream(sock.getOutputStream());
             while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
                 T nextMessage = encdec.decodeNextByte((byte) read);
                 if (nextMessage != null) {
                     protocol.process(nextMessage);
                 }
+                System.out.println("finished process, moving to next read from socket");
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -69,7 +70,6 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
     @Override
     public void send(T msg) {
         try {
-            BufferedOutputStream out = new BufferedOutputStream(sock.getOutputStream());
             if (msg != null) {
                 out.write(encdec.encode(msg));
                 out.flush();
