@@ -118,7 +118,8 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                     String post = ((String) string).substring(0, string.length() - 1);
                     dataBase.addPostOrPm(post);
                     String[] tokens = post.split(" ");
-                    String output ="0901"+clientUser.getUserName()+"\0"+post+"\0";
+                    connections.send(connectionID,"1005");
+                    String output ="091"+clientUser.getUserName()+"\0"+post+"\0";
                     for (User follower : clientUser.getFollowers()) {
                         if (follower.getCurClient() != -1)
                             connections.send(follower.getCurClient(), output);
@@ -127,7 +128,7 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                     }
                     for (String word : tokens) {
                         if (((Character) word.charAt(0)).equals('@')) {
-                            if (dataBase.getUser(word.substring(1)) != null && clientUser.isBlocked(dataBase.getUser(word.substring(1)))) {
+                            if (dataBase.getUser(word.substring(1)) != null && !clientUser.isBlocked(dataBase.getUser(word.substring(1)))) {
                                 if (dataBase.getUser(word.substring(1)).getCurClient() != -1)
                                     connections.send(dataBase.getUser(word.substring(1)).getCurClient(), post);
                                 else {
@@ -144,7 +145,7 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
 
             case 6: // PM
                 User clientUser = ((ConnectionsImp) connections).getUserMap(connectionID);
-                if (clientUser != null) { // if error accured should I save the PM??
+                if (clientUser != null) {
                     String[] tokens = string.split("\0");
                     if (dataBase.getUser(tokens[0]) != null && clientUser.isFollowing(dataBase.getUser(tokens[0]))) {
                         String filteredMessage = "";
@@ -155,12 +156,13 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                             else
                                 filteredMessage = filteredMessage + word + " ";
                         }
-                        String output ="090"+clientUser.getUserName()+"\0"+filteredMessage+"\0" + tokens[2] + "\0";
+                        String output ="090"+clientUser.getUserName()+"\0"+filteredMessage+" "+tokens[2]+"\0";
                         if (dataBase.getUser(tokens[0]).getCurClient() != -1)
                             connections.send(dataBase.getUser(tokens[0]).getCurClient(),output);
                         else
                             dataBase.getUser(tokens[0]).addMessage(output);
                         dataBase.addPostOrPm(filteredMessage);
+                        connections.send(connectionID,"1006");
                     } else
                         connections.send(connectionID, "1106");
                 } else
@@ -215,7 +217,8 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                     blockingUser.unFollow(blockedUser);
                     // adding to the blocked list at each user
                     blockingUser.addBlocked(blockedUser);
-                    blockedUser.addBlocked(blockingUser); /// need to send ACK feedback?
+                    blockedUser.addBlocked(blockingUser);
+                    connections.send(connectionID,"1012");
                 }
                 else
                     connections.send(connectionID,"1112");

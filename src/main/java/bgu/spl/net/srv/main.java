@@ -1,5 +1,6 @@
 package bgu.spl.net.srv;
 
+import bgu.spl.net.api.BidiMessagingProtocolImp;
 import bgu.spl.net.api.messageEncoderDecoderImp;
 import com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
 
@@ -9,18 +10,29 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class main {
-    public static void main(String[] args){
+    public static void main(String[] args) {
+        BaseServerImp baseServerImp = new BaseServerImp(
+                Integer.decode(args[1]),
+                () -> new BidiMessagingProtocolImp(),
+                () -> new messageEncoderDecoderImp());
+        baseServerImp.serve();
+
+
+
+
+
+        /*
         messageEncoderDecoderImp ed = new messageEncoderDecoderImp();
         byte[] test = ed.encode("1008"+"10"+"50"+"10"+"5020");
-   //     String result ="";
-//        for(int i = 0; i< test.length; i=i+2){
-//            byte[] cur = {test[i], test[i+1]};
-//            short temp = bytesToShort(cur);
-//            result = result + " " + temp;
-//
-//            System.out.println(temp);
-//        }
-//        System.out.println(result);
+        String result ="";
+        for(int i = 0; i< test.length; i=i+2){
+            byte[] cur = {test[i], test[i+1]};
+            short temp = bytesToShort(cur);
+            result = result + " " + temp;
+
+            System.out.println(temp);
+       }
+       System.out.println(result);
         InputStream input = new BufferedInputStream(new ByteArrayInputStream(test));
 
         try { //just for automatic closing
@@ -39,6 +51,8 @@ public class main {
 
 
 
+
+
     }
     public static short bytesToShort(byte[] byteArr)
     {
@@ -46,8 +60,10 @@ public class main {
         result += (short)(byteArr[1] & 0xff);
         return result;
     }
+    */
 
 
+    }
 }
 
 
