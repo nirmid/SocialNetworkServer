@@ -1,6 +1,7 @@
 package bgu.spl.net.srv;
 
 import bgu.spl.net.api.messageEncoderDecoderImp;
+import com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -10,7 +11,16 @@ import java.io.InputStream;
 public class main {
     public static void main(String[] args){
         messageEncoderDecoderImp ed = new messageEncoderDecoderImp();
-        byte[] test = ed.encode("1008 21 15 10 11 50\0");
+        byte[] test = ed.encode("1008"+"10"+"50"+"10"+"5020");
+   //     String result ="";
+//        for(int i = 0; i< test.length; i=i+2){
+//            byte[] cur = {test[i], test[i+1]};
+//            short temp = bytesToShort(cur);
+//            result = result + " " + temp;
+//
+//            System.out.println(temp);
+//        }
+//        System.out.println(result);
         InputStream input = new BufferedInputStream(new ByteArrayInputStream(test));
 
         try { //just for automatic closing
@@ -27,6 +37,18 @@ public class main {
 
 
 
+
+
     }
+    public static short bytesToShort(byte[] byteArr)
+    {
+        short result = (short)((byteArr[0] & 0xff) << 8);
+        result += (short)(byteArr[1] & 0xff);
+        return result;
+    }
+
+
 }
+
+
 

@@ -80,5 +80,4 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
         }
     }
 
-    public void shouldTerminate(){protocol.shouldTerminate();}
 }

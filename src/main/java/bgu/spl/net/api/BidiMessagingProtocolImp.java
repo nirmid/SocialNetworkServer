@@ -45,17 +45,25 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                 String password = tokens[1];
                 int capatcha = Integer.parseInt(tokens[2]);
                 User user = dataBase.getUser(username);
-                if (user != null && user.getPassword().equals(password) && user.getCurClient() == -1 && capatcha == 1 &&
-                        ((ConnectionsImp) connections).getUserMap(connectionID) == null) {
-                    user.setCurClient(connectionID);
-                    ((ConnectionsImp) connections).setUserMap(connectionID, user); // in order to know if certain connectionID has already logged in to some user
-                    connections.send(connectionID, "1002");
-                    message = user.removeMessage();
-                    while (message != null){
-                        connections.send(connectionID, message);
-                        message = user.removeMessage();
+                if (user != null && user.getCurClient() == -1) {
+                    synchronized (user) {
+
+                        if (user.getPassword().equals(password) && user.getCurClient() == -1 && capatcha == 1 &&
+                                ((ConnectionsImp) connections).getUserMap(connectionID) == null) {
+                            user.setCurClient(connectionID);
+                            ((ConnectionsImp) connections).setUserMap(connectionID, user); // in order to know if certain connectionID has already logged in to some user
+                            connections.send(connectionID, "1002");
+                            Object toSend  = user.removeMessage();
+                            while (toSend != null) {
+                                connections.send(connectionID, toSend);
+                                toSend = user.removeMessage();
+                            }
+                        }
+                        else
+                            connections.send(connectionID, "1102");
                     }
-                } else
+                }
+                else
                     connections.send(connectionID, "1102");
                 break;
             }
@@ -67,6 +75,7 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                     ((ConnectionsImp) connections).removeUserMap(connectionID);
                     connections.send(connectionID, "1003");
                     connections.disconnect(connectionID);
+
                 } else
                     connections.send(connectionID, "1103");
                 break;
@@ -74,11 +83,10 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
             case 4: // follow / unfollow
             {
                 int command = Integer.parseInt(string.substring(0, 1));
-                String[] tokens = string.substring(2).split("\0");
-                String username = tokens[0];
+                String username = string.substring(1);
                 User clientUser = ((ConnectionsImp) connections).getUserMap(connectionID);
                 User targetUser = dataBase.getUser(username);
-                if (targetUser == null | clientUser == null || clientUser.isBlocked(targetUser)) { // if user is not registered or the CH is not logged in to a user or blocked
+                if (targetUser == null | clientUser == null || (clientUser != null && clientUser.isBlocked(targetUser))) { // if user is not registered or the CH is not logged in to a user or blocked
                     connections.send(connectionID, "1104");
                 } else {
                     if (command == 0) {
@@ -87,9 +95,9 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                         } else {
                             clientUser.follow(targetUser);
                             targetUser.newFollower(clientUser);
-                            connections.send(connectionID, "1004" + username);
+                            connections.send(connectionID, "1004" + username +"\0");
                         }
-                    } else {
+                    } else if (command == 1) {
                         if (!clientUser.isFollowing(targetUser)) {
                             connections.send(connectionID, "1104");
                         } else {
@@ -97,8 +105,9 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol {
                             dataBase.getUser(username).removeFollower(clientUser);
                             connections.send(connectionID, "1004" + username);
                         }
-
                     }
+                    else
+                        connections.send(connectionID, "1104");
                 }
                 break;
             }
