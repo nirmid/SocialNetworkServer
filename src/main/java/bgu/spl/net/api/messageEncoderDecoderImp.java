@@ -136,7 +136,7 @@ public class messageEncoderDecoderImp implements MessageEncoderDecoder<String> {
         String result = "";
         byte[] opcodeB ={bytes[0],bytes[1]};
         short opcode = bytesToShort(opcodeB);
-        result = new String(bytes, 2, len, StandardCharsets.UTF_8);
+        result = new String(bytes, 2, len-2, StandardCharsets.UTF_8);
         result = opcode+result;
         if(opcode < 10)
             result = '0' +result;

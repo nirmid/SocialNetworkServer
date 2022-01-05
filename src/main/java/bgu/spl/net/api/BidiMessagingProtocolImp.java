@@ -106,7 +106,7 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
                         } else {
                             clientUser.unFollow(targetUser);
                             dataBase.getUser(username).removeFollower(clientUser);
-                            connections.send(connectionID, "1004" + username);
+                            connections.send(connectionID, "1004" + username + "\0");
                         }
                     }
                     else
