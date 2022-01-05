@@ -106,7 +106,7 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
                         } else {
                             clientUser.unFollow(targetUser);
                             dataBase.getUser(username).removeFollower(clientUser);
-                            connections.send(connectionID, "1004" + username);
+                            connections.send(connectionID, "1004" + username +"\0");
                         }
                     }
                     else
@@ -188,10 +188,11 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
             case 8: // STAT
             {
                 if(((ConnectionsImp) connections).getUserMap(connectionID) != null){
-                    String[] tokens = string.split("(//|)|(\0)");
+                    //String[] temp = string.split("\0");
+                    String[] tokens = string.substring(0,string.length()-1).split("\\|");
                     boolean proper = true;
                     String output = "";
-                    for(int i = 0; i<= tokens.length && proper ; i ++){
+                    for(int i = 0; i < tokens.length && proper ; i ++){
                         if(dataBase.getUser(tokens[i]) == null)
                             proper = false;
                         else
