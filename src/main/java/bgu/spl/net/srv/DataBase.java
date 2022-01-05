@@ -32,6 +32,8 @@ public class DataBase {
         return DB;
     }
 
+
+
     public void setUserDB(User user){
         userDB.put(user.getUserName(),user);
     }

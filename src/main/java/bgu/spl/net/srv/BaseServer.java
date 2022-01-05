@@ -3,8 +3,6 @@ package bgu.spl.net.srv;
 import bgu.spl.net.api.BidiMessagingProtocol;
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
-
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -57,10 +55,6 @@ public abstract class BaseServer<T> implements Server<T> {
                 connections.addConnection(id, handler);
                 id = id +1;
                 System.out.println("Client connected: "+id);
-                handler.setOut(new BufferedOutputStream(clientSock.getOutputStream()));
-                handler.send((T)"1103");
-                handler.send((T)"1001");
-
             }
         } catch (IOException ex) {
         }

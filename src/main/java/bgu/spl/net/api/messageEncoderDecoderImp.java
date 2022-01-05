@@ -27,6 +27,7 @@ public class messageEncoderDecoderImp implements MessageEncoderDecoder<String> {
         return null;
     }
 
+
     @Override
     public byte[] encode(String message) {
         byte[] output;
@@ -81,7 +82,6 @@ public class messageEncoderDecoderImp implements MessageEncoderDecoder<String> {
         }
         return output;
     }
-
 
 
 

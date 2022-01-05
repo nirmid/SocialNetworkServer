@@ -16,7 +16,9 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
         dataBase = DataBase.getInstance();
         this.connectionID = connectionId;
         this.connections = connections;
+        System.out.println("protocol started");
     }
+
 
     @Override
     public void process(String message) {
