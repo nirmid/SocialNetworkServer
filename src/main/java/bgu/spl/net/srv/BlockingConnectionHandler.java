@@ -69,4 +69,11 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
         }
     }
 
+    public void setIn(BufferedInputStream in) {
+        this.in = in;
+    }
+
+    public void setOut(BufferedOutputStream out) {
+        this.out = out;
+    }
 }
