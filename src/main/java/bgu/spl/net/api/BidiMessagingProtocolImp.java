@@ -133,9 +133,9 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
                         if (((Character) word.charAt(0)).equals('@')) {
                             if (dataBase.getUser(word.substring(1)) != null && !clientUser.isBlocked(dataBase.getUser(word.substring(1)))) {
                                 if (dataBase.getUser(word.substring(1)).getCurClient() != -1)
-                                    connections.send(dataBase.getUser(word.substring(1)).getCurClient(), post);
+                                    connections.send(dataBase.getUser(word.substring(1)).getCurClient(), output);
                                 else {
-                                    dataBase.getUser(word.substring(1)).addMessage(post);
+                                    dataBase.getUser(word.substring(1)).addMessage(output);
                                 }
                             }
                         }
