@@ -1,4 +1,7 @@
-package bgu.spl.net.srv;
+package bgu.spl.net.impl.BGSServer;
+
+import bgu.spl.net.api.BidiMessagingProtocol;
+import bgu.spl.net.api.Connections;
 
 public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
     private DataBase dataBase;

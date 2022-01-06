@@ -1,4 +1,8 @@
-package bgu.spl.net.srv;
+package bgu.spl.net.api;
+
+import bgu.spl.net.srv.BaseServer;
+import bgu.spl.net.srv.BlockingConnectionHandler;
+import bgu.spl.net.srv.Reactor;
 
 import java.io.Closeable;
 import java.util.function.Supplier;
@@ -25,7 +29,7 @@ public interface Server<T> extends Closeable {
 
         return new BaseServer<T>(port, protocolFactory, encoderDecoderFactory) {
             @Override
-            protected void execute(BlockingConnectionHandler<T>  handler) {
+            protected void execute(BlockingConnectionHandler<T> handler) {
                 new Thread(handler).start();
             }
         };

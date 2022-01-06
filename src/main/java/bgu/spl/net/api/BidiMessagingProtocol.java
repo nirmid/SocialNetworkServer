@@ -1,6 +1,4 @@
-package bgu.spl.net.srv;
-
-import bgu.spl.net.srv.Connections;
+package bgu.spl.net.api;
 
 public interface BidiMessagingProtocol<T>  {
     /**

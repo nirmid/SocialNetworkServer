@@ -1,12 +1,14 @@
-package bgu.spl.net.srv;
+package bgu.spl.net.impl.BGSServer;
 
-import java.io.IOException;
+import bgu.spl.net.api.ConnectionHandler;
+import bgu.spl.net.api.Connections;
+
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ConnectionsImp implements Connections{
+public class ConnectionsImp implements Connections {
 
-    private ConcurrentHashMap<Integer,ConnectionHandler> activeMap;
+    private ConcurrentHashMap<Integer, ConnectionHandler> activeMap;
     private ConcurrentHashMap<Integer,User> UserMap;
 
     public ConnectionsImp(){

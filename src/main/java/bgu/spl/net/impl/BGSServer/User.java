@@ -1,12 +1,7 @@
-package bgu.spl.net.srv;
+package bgu.spl.net.impl.BGSServer;
 
-import com.sun.org.apache.xerces.internal.impl.io.UTF8Reader;
-import com.sun.xml.internal.bind.v2.runtime.output.UTF8XmlOutput;
-
-import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class User {

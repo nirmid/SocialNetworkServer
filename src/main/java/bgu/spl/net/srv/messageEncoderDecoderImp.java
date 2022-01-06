@@ -1,5 +1,7 @@
 package bgu.spl.net.srv;
 
+import bgu.spl.net.api.MessageEncoderDecoder;
+
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
