@@ -49,11 +49,6 @@ public class ConnectionsImp implements Connections{
 
     @Override
     public void disconnect(int connectionId) {
-        try {
-            activeMap.get(connectionId).close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         UserMap.remove(connectionId);
         activeMap.remove(connectionId);
     }

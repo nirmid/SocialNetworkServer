@@ -1,14 +1,10 @@
-package bgu.spl.net.api;
-
-import bgu.spl.net.srv.*;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+package bgu.spl.net.srv;
 
 public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
     private DataBase dataBase;
     private int connectionID;
     private Connections connections;
+    boolean terminate;
 
 
     @Override
@@ -16,13 +12,12 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
         dataBase = DataBase.getInstance();
         this.connectionID = connectionId;
         this.connections = connections;
-        System.out.println("protocol started");
+        terminate = false;
     }
 
 
     @Override
     public void process(String message) {
-        System.out.println(message);
         int opcode = Integer.parseInt((message).substring(0, 2));
         String string = message.substring(2);
         switch (opcode) {
@@ -73,10 +68,11 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
             case 3: // logout
             {
                 if (((ConnectionsImp) connections).getUserMap(connectionID) != null) {
+                    connections.send(connectionID, "1003");
+                    terminate = true;
                     User user = ((ConnectionsImp) connections).getUserMap(connectionID);
                     user.setCurClient(-1);
                     ((ConnectionsImp) connections).removeUserMap(connectionID);
-                    connections.send(connectionID, "1003");
                     connections.disconnect(connectionID);
 
                 } else
@@ -235,6 +231,6 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
 
     @Override
     public boolean shouldTerminate() {
-        return false;
+        return terminate;
     }
 }

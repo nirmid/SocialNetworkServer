@@ -1,6 +1,6 @@
 package bgu.spl.net.impl.rci;
 
-import bgu.spl.net.api.MessageEncoderDecoder;
+import bgu.spl.net.srv.MessageEncoderDecoder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInput;

@@ -1,7 +1,5 @@
 package bgu.spl.net.srv;
 
-import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedSelectorException;
@@ -15,7 +13,7 @@ import java.util.function.Supplier;
 public class Reactor<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<MessagingProtocol<T>> protocolFactory;
+    private final Supplier<BidiMessagingProtocol<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> readerFactory;
     private final ActorThreadPool pool;
     private Selector selector;
@@ -26,7 +24,7 @@ public class Reactor<T> implements Server<T> {
     public Reactor(
             int numThreads,
             int port,
-            Supplier<MessagingProtocol<T>> protocolFactory,
+            Supplier<BidiMessagingProtocol<T>> protocolFactory,
             Supplier<MessageEncoderDecoder<T>> readerFactory) {
 
         this.pool = new ActorThreadPool(numThreads);
@@ -47,6 +45,8 @@ public class Reactor<T> implements Server<T> {
             serverSock.configureBlocking(false);
             serverSock.register(selector, SelectionKey.OP_ACCEPT);
 			System.out.println("Server started");
+            ConnectionsImp connections = new ConnectionsImp();
+            int id = 0;
 
             while (!Thread.currentThread().isInterrupted()) {
 
@@ -58,7 +58,8 @@ public class Reactor<T> implements Server<T> {
                     if (!key.isValid()) {
                         continue;
                     } else if (key.isAcceptable()) {
-                        handleAccept(serverSock, selector);
+                        handleAccept(serverSock, selector,id,connections);
+                        id = id+1;
                     } else {
                         handleReadWrite(key);
                     }
@@ -92,14 +93,16 @@ public class Reactor<T> implements Server<T> {
     }
 
 
-    private void handleAccept(ServerSocketChannel serverChan, Selector selector) throws IOException {
+    private void handleAccept(ServerSocketChannel serverChan, Selector selector,int id_, Connections connections) throws IOException {
         SocketChannel clientChan = serverChan.accept();
         clientChan.configureBlocking(false);
-        final NonBlockingConnectionHandler<T> handler = new NonBlockingConnectionHandler<>(
+        final NonBlockingConnectionHandler<T> handler = new NonBlockingConnectionHandler<T>(
                 readerFactory.get(),
                 protocolFactory.get(),
                 clientChan,
-                this);
+                id_,
+                this,
+                connections);
         clientChan.register(selector, SelectionKey.OP_READ, handler);
     }
 
