@@ -89,7 +89,7 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
                 String username = string.substring(1);
                 User clientUser = ((ConnectionsImp) connections).getUserMap(connectionID);
                 User targetUser = dataBase.getUser(username);
-                if (targetUser == null | clientUser == null || (clientUser != null && clientUser.isBlocked(targetUser))) { // if user is not registered or the CH is not logged in to a user or blocked
+                if (targetUser == null | clientUser == null || clientUser.isBlocked(targetUser)) { // if user is not registered or the CH is not logged in to a user or blocked
                     connections.send(connectionID, "1104");
                 } else {
                     if (command == 0) {
@@ -115,7 +115,7 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
                 break;
             }
 
-            case 5: { // post
+            case 5: { // POST
                 User clientUser = ((ConnectionsImp) connections).getUserMap(connectionID);
                 if (clientUser != null) {
                     String post = ((String) string).substring(0, string.length() - 1);
@@ -177,7 +177,8 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
                 if (((ConnectionsImp) connections).getUserMap(connectionID) != null) {
                     String output = "";
                     for (User user : ((ConnectionsImp) connections).getActiveUsers()) {
-                        output = output + "1007" + user.getStat();
+                        if(!user.isBlocked(((ConnectionsImp) connections).getUserMap(connectionID)))
+                            output = output + "1007" + user.getStat();
                     }
                     connections.send(connectionID, output); // need to incode properly
                 } else
@@ -193,7 +194,7 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
                     boolean proper = true;
                     String output = "";
                     for(int i = 0; i < tokens.length && proper ; i ++){
-                        if(dataBase.getUser(tokens[i]) == null)
+                        if(dataBase.getUser(tokens[i]) == null || dataBase.getUser(tokens[i]).isBlocked(((ConnectionsImp) connections).getUserMap(connectionID)))
                             proper = false;
                         else
                             output = output + "1008"+dataBase.getUser(tokens[i]).getStat();
@@ -209,8 +210,8 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
             }
             case 12: // Block
             {
-                String[] tokens = string.split("\0");
-                User blockedUser = dataBase.getUser(tokens[0]);
+                String check = string.substring(0,string.length()-1);
+                User blockedUser =  dataBase.getUser(check);
                 User blockingUser = ((ConnectionsImp) connections).getUserMap(connectionID);
                 if(blockedUser != null && blockingUser != null ){
                     // remove blocking user from blocked user
