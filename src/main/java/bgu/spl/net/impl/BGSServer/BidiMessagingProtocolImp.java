@@ -16,9 +16,6 @@ public class BidiMessagingProtocolImp implements BidiMessagingProtocol<String> {
         this.connectionID = connectionId;
         this.connections = connections;
         terminate = false;
-        dataBase.addWordToFilter("nir");
-        dataBase.addWordToFilter("abc");
-        dataBase.addWordToFilter("123");
 
     }
 

@@ -18,6 +18,9 @@ public class DataBase {
         userDB = new ConcurrentHashMap<String,User>();
         postDB = new ConcurrentHashMap<User, ConcurrentLinkedQueue<String>>();
         wordsToFilter = new ConcurrentLinkedQueue<String>();
+        this.addWordToFilter("nir");
+        this.addWordToFilter("abc");
+        this.addWordToFilter("123");
     }
 
     public static DataBase getInstance() {
